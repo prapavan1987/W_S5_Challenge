@@ -12,6 +12,12 @@ async function sprintChallenge5() { // Note the async keyword so you can use `aw
   let mentors = [] // fix this
   let learners = [] // fix this
 
+  const learnersData = await axios.get('http://localhost:3003/api/learners');
+  const mentorsData = await axios.get('http://localhost:3003/api/mentors');
+  learners = learnersData.data;
+  mentors = mentorsData.data;
+
+  
   // 👆 ==================== TASK 1 END ====================== 👆
 
   // 👇 ==================== TASK 2 START ==================== 👇
@@ -28,7 +34,24 @@ async function sprintChallenge5() { // Note the async keyword so you can use `aw
   //     "Grace Hopper"
   //   ]`
   // }
+  learners = learners.map((learner) => {
+    const mentorNames = learner.mentors.map((mentorId) => {
+    const mentor = mentors.find((m) => m.id === mentorId)
+      if (mentor) {
+        return `${mentor.firstName} ${mentor.lastName}`
+      } else {
+        return null
+      }
+    }).filter(Boolean)
 
+    return {
+      id: learner.id,
+      fullName: learner.fullName,
+      email: learner.email,
+      mentors: mentorNames, 
+    };
+  })
+  
   // 👆 ==================== TASK 2 END ====================== 👆
 
   const cardsContainer = document.querySelector('.cards')
@@ -53,6 +76,38 @@ async function sprintChallenge5() { // Note the async keyword so you can use `aw
     const mentorsHeading = document.createElement('h4')
     const mentorsList = document.createElement('ul')
 
+    card.classList.add('card')
+    heading.textContent = learner.fullName
+    email.classList.add('email')
+    email.textContent = learner.email
+    mentorsHeading.textContent = 'Mentors'
+    mentorsHeading.classList.add('closed')
+    mentorsList.style.display = 'none'
+
+    
+    learner.mentors.forEach((mentorName) => {
+      const mentorItem = document.createElement('li')
+      mentorItem.textContent = mentorName
+      mentorsList.appendChild(mentorItem)
+    })
+
+    mentorsHeading.addEventListener('click', () => {
+      if (mentorsList.style.display === 'none') {
+        mentorsList.style.display = 'block';
+        mentorsHeading.classList.remove('closed');
+      } else {
+        mentorsList.style.display = 'none';
+        mentorsHeading.classList.add('closed');
+      }
+    })
+
+  
+    card.appendChild(heading);
+    card.appendChild(email);
+    card.appendChild(mentorsHeading);
+    card.appendChild(mentorsList);
+    cardsContainer.appendChild(card);
+  
     // 👆 ==================== TASK 3 END ====================== 👆
 
     // 👆 WORK ONLY ABOVE THIS LINE 👆
